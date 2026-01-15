@@ -36,6 +36,19 @@ CSRF_TRUSTED_ORIGINS = [
 
 
 
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("mahanpashte2004@gmail.com")
+EMAIL_HOST_PASSWORD = os.environ.get("#L4!A9U2T_#Gm&b")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "no-reply@example.com")
+
+if EMAIL_HOST and EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+
 
 # Application definition
 
@@ -211,5 +224,6 @@ FIREWALL_BLOCKED_IPS = [
 
 # Max requests per minute per IP
 FIREWALL_RATE_LIMIT = 300
+
 
 
