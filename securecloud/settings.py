@@ -30,6 +30,10 @@ SECRET_KEY = 'django-insecure-wfp#hm8qyxyi6-8l8z5w(4%56)rvh8=$5!abt-jo!uqimp$rzn
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://sales-analytics-profit-dashboard-2.onrender.com",
+]
+
 
 
 # Application definition
@@ -206,3 +210,4 @@ FIREWALL_BLOCKED_IPS = [
 
 # Max requests per minute per IP
 FIREWALL_RATE_LIMIT = 300
+
