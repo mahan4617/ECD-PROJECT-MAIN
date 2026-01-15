@@ -1,0 +1,77 @@
+body {
+    background-color: #0f0f12;
+    color: #e5e7eb;
+}
+
+.navbar {
+    background-color: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+.navbar.navbar-dark,
+.navbar.bg-transparent {
+    background-color: transparent !important;
+}
+.navbar .navbar-brand {
+    color: #ffffff;
+    font-weight: 600;
+}
+.navbar .nav-link {
+    color: #cbd5e1;
+}
+.navbar .nav-link:hover {
+    color: #ffffff;
+}
+
+/* Cards: use Bootstrap CSS variables to ensure dark background everywhere */
+.card {
+    --bs-card-bg: #15181d;
+    --bs-card-border-color: #3b3f45;
+    --bs-card-color: #e5e7eb;
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-card-border-color);
+    color: var(--bs-card-color);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.table-light {
+    --bs-table-bg: #0f1115;
+    --bs-table-color: #e5e7eb;
+    --bs-table-border-color: #3b3f45;
+}
+
+/* Badges with bg-light should not look white on dark background */
+.badge.bg-light {
+    background-color: #1a1d22 !important;
+    color: #e5e7eb !important;
+    border-color: #3b3f45 !important;
+}
+
+.alert {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+}
+
+.table {
+    --bs-table-bg: #15181d;
+    --bs-table-color: #e5e7eb;
+    --bs-table-border-color: #3b3f45;
+    background-color: var(--bs-table-bg);
+    color: var(--bs-table-color);
+    border-color: var(--bs-table-border-color);
+}
+.table tbody tr,
+.table tbody td,
+.table thead th {
+    background-color: #15181d;
+    color: #e5e7eb;
+    border-color: #3b3f45;
+}
+.table-hover tbody tr:hover td,
+.table-hover tbody tr:hover th {
+    background-color: #252a33;
+    color: #ffffff;
+}

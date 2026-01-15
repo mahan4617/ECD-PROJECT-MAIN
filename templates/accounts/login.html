@@ -1,0 +1,293 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - Secure Cloud</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+        background-color: #0f0f12;
+        font-family: 'Inter', sans-serif;
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .auth-brand {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    .auth-brand i { color: #8b5cf6; }
+    .auth-card {
+        background-color: #0f0f12;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 450px;
+    }
+    .auth-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .auth-subtitle {
+        color: #cbd5e1;
+        margin-bottom: 1.5rem;
+    }
+    .input-group .form-control {
+        background-color: #0b0b0e;
+        border-color: rgba(255,255,255,.2);
+        color: #e5e7eb;
+    }
+    .input-group-text {
+        background-color: #0b0b0e;
+        border-color: rgba(255,255,255,.2);
+        color: #9ca3af;
+    }
+    .btn-auth {
+        width: 100%;
+        background-color: #8b5cf6;
+        border-color: #8b5cf6;
+        color: #fff;
+        font-weight: 600;
+    }
+    .btn-auth:hover { background-color: #7c3aed; border-color: #7c3aed; }
+    .auth-footer { margin-top: 1rem; color: #cbd5e1; }
+    .auth-footer a { color: #8b5cf6; text-decoration: none; }
+    .progress-container { display:flex; align-items:center; gap:.4rem; margin:1rem 0; }
+    .progress-step { width:36px; height:6px; border-radius:6px; background:#1f2937; }
+    .progress-step.active { background:#8b5cf6; }
+    .progress-step.inactive { background:#334155; }
+  </style>
+</head>
+<body>
+
+<a href="/" class="auth-brand">
+  <i class="bi bi-lock-fill"></i>
+  SecureCloud
+</a>
+
+<div class="auth-card">
+  <h1 class="auth-title">Login</h1>
+  <p class="auth-subtitle">Choose password or face to continue</p>
+
+  <form method="post">
+    {% csrf_token %}
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+    {% endif %}
+
+    <input type="hidden" name="login_mode" id="loginModeInput" value="{{ login_mode|default:'password' }}">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="btn-group btn-group-sm" role="group">
+        <button type="button" class="btn btn-outline-light{% if login_mode != 'face' %} active{% endif %}" id="modePasswordBtn">Password</button>
+        <button type="button" class="btn btn-outline-light{% if login_mode == 'face' %} active{% endif %}" id="modeFaceBtn">Face</button>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-person"></i></span>
+        {{ form.username }}
+      </div>
+      {% if form.username.errors %}
+        <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+        {{ form.email }}
+      </div>
+      {% if form.email.errors %}
+        <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3" id="passwordSection">
+      <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+        {{ form.password }}
+      </div>
+      {% if form.password.errors %}
+        <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3{% if login_mode != 'face' %} d-none{% endif %}" id="faceSection">
+      <label class="form-label d-flex justify-content-between align-items-center">
+        <span>Face login</span>
+        <span class="badge bg-secondary">Beta</span>
+      </label>
+      <div class="border rounded p-2 mb-2">
+        <video id="loginFaceVideo" autoplay playsinline style="width:100%;max-height:220px;border-radius:8px;display:none;"></video>
+        <canvas id="loginFaceCanvas" style="width:100%;max-height:220px;border-radius:8px;display:none;"></canvas>
+        <div id="loginFacePlaceholder" class="text-muted small text-center py-3">
+          Camera is off. Click "Start camera" to run a quick face check.
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-light btn-sm" id="loginFaceStart">Start camera</button>
+        <button type="button" class="btn btn-outline-primary btn-sm" id="loginFaceCapture" disabled>Capture</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="loginFaceReset" disabled>Reset</button>
+      </div>
+      <input type="hidden" name="face_login_data" id="loginFaceData">
+      <div id="loginFaceStatus" class="text-muted small mt-2"></div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-2">
+      <span class="text-muted small">Step 1 of 2</span>
+      <div class="progress-container">
+        <div class="progress-step active"></div>
+        <div class="progress-step inactive"></div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-auth">Continue to MFA</button>
+  </form>
+
+  <div class="auth-footer">
+    Don't have an account? <a href="{% url 'register' %}">Register</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var modeInput = document.getElementById('loginModeInput');
+  var modePasswordBtn = document.getElementById('modePasswordBtn');
+  var modeFaceBtn = document.getElementById('modeFaceBtn');
+  var passwordSection = document.getElementById('passwordSection');
+  var faceSection = document.getElementById('faceSection');
+
+  var video = document.getElementById('loginFaceVideo');
+  var canvas = document.getElementById('loginFaceCanvas');
+  var placeholder = document.getElementById('loginFacePlaceholder');
+  var startBtn = document.getElementById('loginFaceStart');
+  var captureBtn = document.getElementById('loginFaceCapture');
+  var resetBtn = document.getElementById('loginFaceReset');
+  var dataInput = document.getElementById('loginFaceData');
+  var statusEl = document.getElementById('loginFaceStatus');
+  var stream = null;
+  var currentMode = modeInput ? modeInput.value || 'password' : 'password';
+  var loginForm = document.querySelector('form');
+
+  function stopStream() {
+    if (stream) {
+      stream.getTracks().forEach(function (t) { t.stop(); });
+      stream = null;
+    }
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    if (modeInput) {
+      modeInput.value = mode;
+    }
+    if (mode === 'password') {
+      passwordSection.classList.remove('d-none');
+      faceSection.classList.add('d-none');
+      modePasswordBtn.classList.add('active');
+      modeFaceBtn.classList.remove('active');
+    } else {
+      passwordSection.classList.add('d-none');
+      faceSection.classList.remove('d-none');
+      modePasswordBtn.classList.remove('active');
+      modeFaceBtn.classList.add('active');
+    }
+  }
+
+  modePasswordBtn.addEventListener('click', function () {
+    setMode('password');
+  });
+
+  modeFaceBtn.addEventListener('click', function () {
+    setMode('face');
+  });
+
+  startBtn.addEventListener('click', function () {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      statusEl.textContent = 'Camera not supported in this browser.';
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(function (s) {
+        stream = s;
+        video.srcObject = s;
+        video.style.display = 'block';
+        placeholder.style.display = 'none';
+        captureBtn.disabled = false;
+        resetBtn.disabled = false;
+        statusEl.textContent = 'Camera is on. Center your face and capture.';
+      })
+      .catch(function (err) {
+        statusEl.textContent = 'Cannot access camera: ' + err.message;
+      });
+  });
+
+  captureBtn.addEventListener('click', function () {
+    if (!stream) {
+      statusEl.textContent = 'Start camera first.';
+      return;
+    }
+    var w = video.videoWidth || 320;
+    var h = video.videoHeight || 240;
+    canvas.width = w;
+    canvas.height = h;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, w, h);
+    var dataUrl = canvas.toDataURL('image/png');
+    dataInput.value = dataUrl;
+    canvas.style.display = 'block';
+    statusEl.textContent = 'Face captured. Verifying your face and sending OTP...';
+    if (loginForm) {
+      stopStream();
+      loginForm.submit();
+    }
+  });
+
+  resetBtn.addEventListener('click', function () {
+    stopStream();
+    video.style.display = 'none';
+    canvas.style.display = 'none';
+    placeholder.style.display = 'block';
+    captureBtn.disabled = true;
+    resetBtn.disabled = true;
+    dataInput.value = '';
+    statusEl.textContent = '';
+  });
+
+  window.addEventListener('beforeunload', stopStream);
+
+  setMode(currentMode);
+});
+</script>
+</body>
+</html>

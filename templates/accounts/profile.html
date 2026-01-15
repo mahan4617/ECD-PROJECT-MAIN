@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+{% block content %}
+<div class="dashboard-body">
+  <aside class="sidebar">
+    <div class="sidebar-header d-flex align-items-center gap-2 mb-4">
+      <i class="bi bi-lock-fill text-primary"></i>
+      <a href="/" class="text-decoration-none fw-semibold">SecureCloud</a>
+    </div>
+    <nav class="nav flex-column">
+      <a href="{% url 'dashboard' %}" class="nav-link"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</a>
+      <a href="{% url 'upload' %}" class="nav-link"><i class="bi bi-cloud-upload me-2"></i>Upload</a>
+      <a href="{% url 'file_list' %}" class="nav-link"><i class="bi bi-files me-2"></i>History</a>
+      <a href="{% url 'profile' %}" class="nav-link active"><i class="bi bi-person me-2"></i>Profile</a>
+    </nav>
+    <div class="mt-auto">
+      <a href="{% url 'logout' %}" class="btn btn-outline-danger w-100 mb-3">
+        <i class="bi bi-box-arrow-right me-1"></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header mb-4">
+      <h1 class="page-title">Profile</h1>
+      <p class="text-muted mb-0">Manage your account settings.</p>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card profile-card shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-4">
+              <div class="avatar-circle">
+                <i class="bi bi-person-fill avatar-icon"></i>
+              </div>
+              <div>
+                <h4 class="mb-1 text-white">{{ request.user.username }}</h4>
+                <p class="text-muted mb-0">{{ request.user.email }}</p>
+              </div>
+            </div>
+            
+            <hr class="divider">
+            
+            <div class="mb-3">
+              <label class="meta-label small text-uppercase fw-bold">Account Status</label>
+              <div class="d-flex align-items-center gap-2 mt-1">
+                <i class="bi bi-check-circle-fill text-success"></i>
+                <span class="text-light">Active</span>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="meta-label small text-uppercase fw-bold">Date Joined</label>
+              <div class="mt-1 text-light">{{ request.user.date_joined|date:"F d, Y" }}</div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="meta-label small text-uppercase fw-bold">Last Login</label>
+              <div class="mt-1 text-light">{{ request.user.last_login|date:"F d, Y H:i" }}</div>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card profile-card shadow-sm">
+          <div class="card-body">
+            <h5 class="mb-3 text-white">Uploads by Type</h5>
+            <div class="row">
+              <div class="col-sm-8">
+                <div class="chart-wrapper">
+                  <canvas id="fileTypePie"></canvas>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <ul id="file-type-legend" class="legend-list mb-0"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<style>
+.dashboard-body{display:flex;min-height:100vh;background-color:#0f0f12}
+.sidebar{width:260px;border-right:1px solid #1e293b;padding:1rem 1rem 0;color:#e5e7eb;display:flex;flex-direction:column}
+.nav-link{color:#cbd5e1}
+.nav-link.active{color:#ffffff;font-weight:600}
+.main-content{flex:1;padding:2rem;color:#e5e7eb}
+.page-title{color:#ffffff}
+.text-muted{color:#cbd5e1 !important}
+.profile-card{background-color:#0f1115;border:1px solid #3b3f45;color:#e5e7eb}
+.avatar-circle{background-color:#1e293b;padding:.75rem;border-radius:50%}
+.avatar-icon{color:#5aa2ff;font-size:1.6rem}
+.divider{border-color:#3b3f45}
+.meta-label{color:#e2e8f0}
+.text-light{color:#e5e7eb}
+.legend-list{list-style:none;padding-left:0}
+.legend-item{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;color:#e5e7eb}
+.legend-swatch{width:12px;height:12px;border-radius:2px;display:inline-block}
+.legend-label{flex:1}
+.legend-value{color:#cbd5e1}
+.chart-wrapper{position:relative;height:320px}
+.legend-list{font-size:.85rem}
+.legend-item{margin-bottom:.3rem}
+.legend-swatch{width:10px;height:10px}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var labels = {{ labels_json|safe }};
+  var counts = {{ counts_json|safe }};
+  var total = counts.reduce(function(a,b){return a+b;}, 0);
+  var percents = counts.map(function(c){ return total ? Math.round((c/total)*1000)/10 : 0; });
+  var colors = ['#0b1b57','#153e75','#1e5ab6','#2e74ff','#77a3ff','#afc3f2','#d0dbf2','#0a1230','#1b2a4a'];
+  var ctx = document.getElementById('fileTypePie');
+  if (ctx && window.Chart) {
+    if (window.ChartDataLabels) { Chart.register(ChartDataLabels); }
+    var chartData = {
+      labels: labels,
+      datasets: [{
+        data: counts,
+        backgroundColor: colors.slice(0, labels.length),
+        borderColor: '#0f1115'
+      }]
+    };
+    var chartOpts = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          color: '#ffffff',
+          formatter: function(value, ctx){
+            var i = ctx.dataIndex;
+            return percents[i] ? Math.round(percents[i]) + '%' : '';
+          },
+          font: { weight: '600' },
+          anchor: 'center',
+          align: 'center'
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context){
+              var i = context.dataIndex;
+              var lbl = labels[i];
+              var val = counts[i];
+              var pct = percents[i].toFixed(1) + '%';
+              return lbl + ': ' + val + ' (' + pct + ')';
+            }
+          }
+        }
+      }
+    };
+    new Chart(ctx, { type: 'pie', data: chartData, options: chartOpts });
+  }
+  var legendEl = document.getElementById('file-type-legend');
+  if (legendEl) {
+    legendEl.innerHTML = '';
+    if (!total) {
+      var li = document.createElement('li');
+      li.className = 'legend-item';
+      var lab = document.createElement('span');
+      lab.className = 'legend-label';
+      lab.textContent = 'No data';
+      legendEl.appendChild(lab);
+    } else {
+      labels.forEach(function(lbl, i){
+        var li = document.createElement('li');
+        li.className = 'legend-item';
+        var sw = document.createElement('span');
+        sw.className = 'legend-swatch';
+        sw.style.backgroundColor = colors[i % colors.length];
+        var lab = document.createElement('span');
+        lab.className = 'legend-label';
+        lab.textContent = lbl;
+        li.appendChild(sw);
+        li.appendChild(lab);
+        legendEl.appendChild(li);
+      });
+    }
+  }
+});
+</script>
+{% endblock %}

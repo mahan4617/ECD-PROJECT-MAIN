@@ -1,0 +1,13 @@
+Django>=6.0,<7.0
+djangorestframework>=3.14
+djangorestframework-simplejwt>=5.3
+Pillow>=10.0
+cryptography>=42.0
+python-dotenv>=1.0
+gunicorn>=21.0
+whitenoise>=6.7
+dj-database-url>=2.1
+psycopg2-binary>=2.9
+cloudinary>=1.41
+django-cloudinary-storage>=0.3
+opencv-python>=4.10

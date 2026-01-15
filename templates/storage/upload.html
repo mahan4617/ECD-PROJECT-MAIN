@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+{% block messages %}
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+  <div id="upload-toast-container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="toast align-items-center text-bg-success border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+          <div class="d-flex">
+            <div class="toast-body">{{ message }}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-body">
+  <aside class="sidebar">
+    <div class="sidebar-header d-flex align-items-center gap-2 mb-4">
+      <i class="bi bi-lock-fill text-primary"></i>
+      <a href="/" class="text-decoration-none fw-semibold">SecureCloud</a>
+    </div>
+    <nav class="nav flex-column">
+      <a href="{% url 'dashboard' %}" class="nav-link"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</a>
+      <a href="{% url 'upload' %}" class="nav-link active"><i class="bi bi-cloud-upload me-2"></i>Upload</a>
+      <a href="{% url 'file_list' %}" class="nav-link"><i class="bi bi-files me-2"></i>History</a>
+      <a href="{% url 'profile' %}" class="nav-link"><i class="bi bi-person me-2"></i>Profile</a>
+    </nav>
+    <div class="mt-auto">
+      <a href="{% url 'logout' %}" class="btn btn-outline-danger w-100 mb-3">
+        <i class="bi bi-box-arrow-right me-1"></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header mb-4">
+      <h1 class="page-title">Upload Files</h1>
+      <p class="text-muted mb-0">Upload files to your encrypted cloud storage</p>
+    </div>
+    
+    {% if last_uploaded_filename %}
+    <div class="alert alert-success d-flex align-items-center justify-content-between">
+      <div>
+        <i class="bi bi-check-circle-fill me-2"></i>
+        Your file "<strong>{{ last_uploaded_filename }}</strong>" was uploaded successfully.
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {% if form.errors %}
+      <div class="alert alert-danger">{{ form.errors }}</div>
+      {% endif %}
+
+      <div class="upload-zone" id="file-zone">
+        <input type="file" name="file" id="id_file" class="d-none" required>
+        <div class="upload-icon"><i class="bi bi-upload"></i></div>
+        <div class="upload-title">Drop your file here, or browse</div>
+        <div class="upload-subtitle">Supports: PDF, ZIP, Images, Documents</div>
+        <div id="selected-file-name" class="selected-filename"></div>
+        <button type="button" id="btn-select-file" class="btn btn-dark">Select File</button>
+      </div>
+
+      <div class="upload-zone py-4" id="cover-zone">
+        <input type="file" name="cover_image" id="id_cover_image" class="d-none" accept="image/*" required>
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <i class="bi bi-image fs-4 text-muted"></i>
+          <div class="text-start">
+            <div class="fw-medium">Select Cover Image</div>
+            <div class="small text-light">Required for Steganography (PNG/JPG)</div>
+          </div>
+          <button type="button" id="btn-select-cover" class="btn btn-outline-secondary ms-3">Browse</button>
+        </div>
+        <div id="selected-cover-name" class="selected-filename mt-2"></div>
+      </div>
+
+      <div class="row g-4 mb-3">
+        <div class="col-md-6">
+          <div class="card info-card">
+            <div class="card-body">
+              <h5>Encryption</h5>
+              <p>All files are encrypted using AES-256 encryption before upload.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card info-card">
+            <div class="card-body">
+              <h5>Firewall Protection</h5>
+              <p>Advanced firewall rules protect your files from unauthorized access.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary px-4">Start Upload</button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<style>
+.dashboard-body{display:flex;min-height:100vh;background-color:#0f0f12}
+.sidebar{width:260px;border-right:1px solid #1e293b;padding:1rem 1rem 0;color:#e5e7eb;display:flex;flex-direction:column}
+.nav-link{color:#cbd5e1}
+.nav-link.active{color:#ffffff;font-weight:600}
+.main-content{flex:1;padding:2rem;color:#e5e7eb}
+.upload-zone{border:2px dashed #475569;border-radius:16px;padding:3rem 2rem;text-align:center;background-color:#15181d;margin-bottom:1.5rem;color:#e5e7eb}
+.upload-zone.dragover{border-color:#0d6efd;background-color:#212529}
+.upload-icon{font-size:2rem;color:#9ca3af;margin-bottom:.75rem}
+.upload-title{font-weight:600;margin-bottom:.25rem;color:#ffffff}
+.upload-subtitle{color:#cbd5e1;margin-bottom:1rem}
+.info-card{border:1px solid #343a40;border-radius:12px}
+.selected-filename{margin-top:.75rem;color:#cbd5e1;font-size:.875rem;word-break:break-all}
+</style>
+
+<script>
+(function(){
+  const zone = document.getElementById('file-zone');
+  const fileInput = document.getElementById('id_file');
+  const btnFile = document.getElementById('btn-select-file');
+  const coverInput = document.getElementById('id_cover_image');
+  const btnCover = document.getElementById('btn-select-cover');
+  const fileNameEl = document.getElementById('selected-file-name');
+  const coverNameEl = document.getElementById('selected-cover-name');
+
+  btnFile.addEventListener('click', () => fileInput.click());
+  btnCover.addEventListener('click', () => coverInput.click());
+
+  fileInput.addEventListener('change', () => {
+    const f = fileInput.files && fileInput.files[0];
+    fileNameEl.textContent = f ? f.name : '';
+  });
+  coverInput.addEventListener('change', () => {
+    const f = coverInput.files && coverInput.files[0];
+    coverNameEl.textContent = f ? f.name : '';
+  });
+
+  ['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation(); zone.classList.add('dragover');
+  }));
+  ['dragleave','drop'].forEach(evt => zone.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation(); zone.classList.remove('dragover');
+  }));
+  zone.addEventListener('drop', e => {
+    const files = e.dataTransfer.files;
+    if (files && files.length) {
+      fileInput.files = files;
+      fileNameEl.textContent = files[0].name;
+    }
+  });
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+  var container = document.getElementById('upload-toast-container');
+  if (container) {
+    var toasts = container.querySelectorAll('.toast');
+    toasts.forEach(function(t) { 
+      if (window.bootstrap && bootstrap.Toast) {
+        new bootstrap.Toast(t).show(); 
+      } else {
+        t.classList.add('show');
+      }
+    });
+  }
+});
+</script>
+{% endblock %}
