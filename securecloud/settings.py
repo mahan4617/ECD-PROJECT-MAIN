@@ -31,8 +31,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = [
-    "https://sales-analytics-profit-dashboard-2.onrender.com",
+    "https://ecd-project-main.onrender.com",
 ]
+
 
 
 
@@ -210,4 +211,5 @@ FIREWALL_BLOCKED_IPS = [
 
 # Max requests per minute per IP
 FIREWALL_RATE_LIMIT = 300
+
 
