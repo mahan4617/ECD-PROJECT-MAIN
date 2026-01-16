@@ -31,7 +31,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = [
-    "https://ecd-project-main.onrender.com",
+    "https://ecd-project-main-1.onrender.com",
 ]
 
 
@@ -227,6 +227,7 @@ if EMAIL_HOST and EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 
 
 
