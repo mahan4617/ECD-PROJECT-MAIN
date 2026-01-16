@@ -29,22 +29,10 @@ SECRET_KEY = 'django-insecure-wfp#hm8qyxyi6-8l8z5w(4%56)rvh8=$5!abt-jo!uqimp$rzn
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://ecd-project-main-1.onrender.com",
-]
 ALLOWED_HOSTS = ["ecd-project-main-1.onrender.com", ".onrender.com"]
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-
-
 CSRF_TRUSTED_ORIGINS = [
     "https://ecd-project-main-1.onrender.com",
 ]
-
-
-
-
 
 # Application definition
 
@@ -220,24 +208,3 @@ FIREWALL_BLOCKED_IPS = [
 
 # Max requests per minute per IP
 FIREWALL_RATE_LIMIT = 300
-
-
-
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "").strip()
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "").strip()
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "").strip()
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").strip().lower() in ("true", "1", "yes")
-
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "no-reply@example.com")
-
-if EMAIL_HOST and EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-else:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-
-
-
-
-
